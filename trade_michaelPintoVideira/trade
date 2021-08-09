@@ -1,0 +1,236 @@
+#!/usr/bin/env python3
+import sys
+import random
+
+info_gene = {} #info general, c'est la ou tout vas se jouer
+BTC_ETH = {}#information de la section conversion BTC_ETH
+USDT_ETH = {}#information de la section conversion USDT_ETH
+USDT_BTC = {}#information de la section conversion USDT_BTC
+
+BTC_ETH['evolution'] = 0
+USDT_ETH['evolution'] = 0 #avec ça on calcule l'evolution, j'explique ça plus tard, go main
+USDT_BTC['evolution'] = 0
+USDT_ETH['close'] = 0
+USDT_BTC['close'] = 0
+info_gene['stack_btc'] = ""
+info_gene['stack_eth'] = ""
+global can_i_buy
+can_i_buy = 0
+USDT_ETH['en_attente'] = 1
+USDT_BTC['en_attente'] = 1
+def btc_Eth_Recup_Info(decompose):
+    BTC_ETH['date'] = decompose[1]
+    BTC_ETH['high'] = decompose[2]
+    BTC_ETH['low'] = decompose[3]
+    BTC_ETH['open'] = decompose[4]
+    BTC_ETH['close'] = decompose[5]
+    BTC_ETH['volume'] = decompose[6]
+    """
+    print('--------------------BTC_ETH--------------------', file=sys.stderr)
+    print('date: ' + BTC_ETH['date'], file=sys.stderr)
+    print('high: ' + BTC_ETH['high'], file=sys.stderr)
+    print('low: ' + BTC_ETH['low'], file=sys.stderr)
+    print('open: ' + BTC_ETH['open'], file=sys.stderr)
+    print('close: ' + BTC_ETH['close'], file=sys.stderr)
+    print('volume: ' + BTC_ETH['volume'], file=sys.stderr)
+    print('evolution: ' + str(USDT_BTC['evolution']), file=sys.stderr)
+    """
+
+def usdt_Btc_Recup_info(decompose):
+    USDT_BTC['date'] = decompose[1]
+    USDT_BTC['high'] = decompose[2]
+    USDT_BTC['low'] = decompose[3]
+    USDT_BTC['open'] = decompose[4]
+    USDT_BTC['close'] = decompose[5]
+    USDT_BTC['volume'] = decompose[6]
+    """
+    print('--------------------USDT_BTC--------------------', file=sys.stderr)
+    print('date: ' + USDT_BTC['date'], file=sys.stderr)
+    print('high: ' + USDT_BTC['high'], file=sys.stderr)
+    print('low: ' + USDT_BTC['low'], file=sys.stderr)
+    print('open: ' + USDT_BTC['open'], file=sys.stderr)
+    print('close: ' + USDT_BTC['close'], file=sys.stderr)
+    print('volume: ' + USDT_BTC['volume'], file=sys.stderr)
+    print('evolution: ' + str(USDT_BTC['evolution']), file=sys.stderr)
+    """
+def usdt_Eth_Recup_info(decompose):
+    USDT_ETH['date'] = decompose[1]
+    USDT_ETH['high'] = decompose[2]
+    USDT_ETH['low'] = decompose[3]
+    USDT_ETH['open'] = decompose[4]
+    USDT_ETH['close'] = decompose[5]
+    USDT_ETH['volume'] = decompose[6]
+    """
+    print('--------------------USDT_ETH--------------------', file=sys.stderr)
+    print('date: ' + USDT_ETH['date'], file=sys.stderr)
+    print('high: ' + USDT_ETH['high'], file=sys.stderr)
+    print('low: ' + USDT_ETH['low'], file=sys.stderr)
+    print('open: ' + USDT_ETH['open'], file=sys.stderr)
+    print('close: ' + USDT_ETH['close'], file=sys.stderr)
+    print('volume: ' + USDT_ETH['volume'], file=sys.stderr)
+    print('evolution: ' + str(USDT_ETH['evolution']), file=sys.stderr)
+    """
+
+def mise_a_jour_du_stack(info_separ):
+    stack_compare = info_separ[3]
+    portfouille = stack_compare.split(',')
+    for analyse in portfouille:
+        analyse_2 = analyse.split(':')
+        if(analyse_2[0] == "BTC"):
+            info_gene['BTC'] = analyse_2[1]
+        if(analyse_2[0] == "ETH"):
+            info_gene['ETH'] = analyse_2[1]
+        if(analyse_2[0] == "USDT"):
+            info_gene['stack'] = analyse_2[1]
+
+def buy_eth():
+    dollars = float(info_gene['stack']) / 3
+    eth = dollars / float(USDT_ETH['close'])
+    print("buy USDT_ETH " + str(eth))
+    return eth
+
+def buy_btc():
+    dollars = float(info_gene['stack']) / 3
+    btc = dollars / float(USDT_BTC['close'])
+    print("buy USDT_BTC " + str(btc))
+    return btc
+
+def less_go_do_some_shit(BTC_ETH, USDT_ETH, USDT_BTC, to_buy): #c'est ici qu'il faut mettre l'algo
+    #USDT_ETH['evolution'] += float(USDT_ETH['close'])
+    #USDT_BTC['evolution'] += float(USDT_BTC['close'])
+    what_to_sell = 0
+    res = 0.0
+    montante = 0
+    begin_eth = 0
+    end_etc = 0
+    end_eth = 0
+    begin_btc = float(USDT_BTC['close'])
+    begin_eth = float(USDT_ETH['close'])
+
+    if(USDT_ETH['evolution'] >= USDT_BTC['evolution'] and USDT_ETH['en_attente'] == 1):
+        res = buy_eth()
+        res -= 0.1
+        what_to_sell = 1
+        USDT_ETH['en_attente'] = 0
+    if(USDT_ETH['evolution'] < USDT_BTC['evolution'] and USDT_BTC['en_attente'] == 1):
+        res = buy_btc()
+        res -= 0.1
+        what_to_sell = 2
+        USDT_BTC['en_attente'] = 0
+    """--------to_wait--------"""
+    for i in range(0, 200):
+        input_to_analyse = input()
+        print("pass")
+        input_to_analyse_split = input_to_analyse.split(' ')
+        if(input_to_analyse_split[0] == 'update'):
+            if(input_to_analyse_split[2] == 'next_candles'):
+                decompose = input_to_analyse_split[3]
+                decompose = decompose.split(';')
+                for info_btc in decompose: #si l'information est un setting, on mets les info generale dans les update
+                    info_detail = info_btc.split(',')
+                    if(info_detail[0] == 'BTC_ETH'):
+                        btc_Eth_Recup_Info(info_detail)
+                    if(info_detail[0] == 'USDT_BTC'):
+                        usdt_Btc_Recup_info(info_detail)
+                    if(info_detail[0] == 'USDT_ETH'):
+                        usdt_Eth_Recup_info(info_detail)
+    """--------------------"""
+    end_btc = float(USDT_BTC['close'])
+    end_eth = float(USDT_ETH['close'])
+    print('end_btc: ' + str(end_btc), file=sys.stderr)
+    print('begin_btc: ' + str(begin_btc), file=sys.stderr)
+    input_to_analyse = input()
+    if(what_to_sell == 1):
+            if(end_eth > begin_eth):
+                print("sell USDT_ETH " + str(res))
+                USDT_ETH['en_attente'] = 1
+    if(what_to_sell == 2):
+            if(end_btc > begin_btc):
+                print("sell USDT_BTC " + str(res))
+                USDT_BTC['en_attente'] = 1
+        
+#l'algo est très simple, on achète haut pour vendre encore plus haut, on prends l'evolution de ETH et DU BTC, on regarde qui a eu la plus haute evolution sur
+#20 cycle et on achète, on attends 10 cycle et on vends, voilà le coeur du sujet
+
+def main():
+    i = 0
+    boucle = 0
+    to_buy = 49
+    stop = 0
+    while(1):
+        info_war = input() #on saisis les informations tu connais
+        print('the_line_to_analyse: ' + info_war, file=sys.stderr)
+        info_separ = info_war.split(' ')
+        if(info_separ[0] == 'settings'): #si l'information est un setting, on mets les info generale dans le setting
+            if (info_separ[1] == 'timebank'):
+                info_gene['timebank'] = info_separ[2]
+            if (info_separ[1] == 'initial_stack'):
+                info_gene['stack'] = info_separ[2]
+            if (info_separ[1] == 'transaction_fee_percent'):
+                info_gene['transaction_fee_percent'] = info_separ[2]
+            if (info_separ[1] == 'game' and info_separ[2] == 'stacks'):
+                mise_a_jour_du_stack(info_separ)
+        if(info_separ[0] == 'update'):
+            if(info_separ[2] == 'next_candles'):
+                decompose = info_separ[3]
+                decompose = decompose.split(';')
+                for info_btc in decompose: #si l'information est un setting, on mets les info generale dans les update
+                    info_detail = info_btc.split(',')
+                    if(info_detail[0] == 'BTC_ETH'):
+                        btc_Eth_Recup_Info(info_detail)
+                    if(info_detail[0] == 'USDT_BTC'):
+                        usdt_Btc_Recup_info(info_detail)
+                    if(info_detail[0] == 'USDT_ETH'):
+                        usdt_Eth_Recup_info(info_detail)
+            boucle +=1
+            if(boucle <= 309):
+                USDT_ETH['evolution'] = USDT_ETH['evolution'] + float(USDT_ETH['close'])
+                USDT_BTC['evolution'] = USDT_BTC['evolution'] + float(USDT_BTC['close'])
+                print("pass")
+            if(boucle > 309):
+                USDT_ETH['evolution'] += float(USDT_ETH['close'])
+                USDT_BTC['evolution'] += float(USDT_BTC['close'])
+                print('to_buy: ' + str(to_buy), file=sys.stderr)
+                boucle = 312
+                print("Mon portefouille USDT: " + info_gene['stack'], file=sys.stderr)
+                print("Mon portefouille BTC: " + str(info_gene['stack_btc']), file=sys.stderr)
+                print("Mon portefouille ETH: " + str(info_gene['stack_eth']), file=sys.stderr)
+                print("pass")
+                if(info_separ[2] == 'stacks'):
+                    decompose = info_separ[3]
+                    decompose = decompose.split(',')
+                    for info in decompose: #si l'information est un setting, on mets les info generale dans les update
+                        info_detail = info.split(':')
+                        if(info_detail[0] == "BTC"):
+                            info_gene['stack_btc'] = info_detail[1]
+                        if(info_detail[0] == "ETH"):
+                            info_gene['stack_eth'] = info_detail[1]
+                        if(info_detail[0] == "USDT"):
+                            info_gene['stack'] = info_detail[1]
+                if(stop == 0):
+                    begin_btc = float(USDT_BTC['close'])
+                    begin_eth = float(USDT_ETH['close'])
+                    stop = 1
+        if(info_separ[0] == 'action'):
+            to_buy += 1
+            if(to_buy == 50):
+                end_btc = float(USDT_BTC['close'])
+                end_eth = float(USDT_ETH['close'])
+                stop = 0
+                to_buy = 0
+                if (end_btc > begin_btc or end_eth > begin_eth):
+                    less_go_do_some_shit(BTC_ETH, USDT_ETH, USDT_BTC, to_buy)
+            else: 
+                print("pass")
+
+            
+
+
+main()
+
+#system
+#
+#
+#bot_entré ----> recup de toutes les info ------> traitement des info -----> reponse
+#
+#
